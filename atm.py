@@ -2,7 +2,7 @@ from tkinter import messagebox
 from tkinter import *
 import sqlite3
 
-class User:
+class Atm:
     def __init__(self):
         self.db = sqlite3.connect('atm.db')
         self.cursor = self.db.cursor()
@@ -264,5 +264,12 @@ class User:
         atmbtn = Button(self.root,width = 40,text = "ATM", command = self.atm)
         atmbtn.place(relx = 0.1,rely = 0.45)
 
-        self.root.mainloop()   
-User()
+        self.root.mainloop() 
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.db.close()
+
+Atm()
