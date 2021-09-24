@@ -7,288 +7,254 @@ class Conference:
     def __init__(self):
         self.db = sqlite3.connect("conference.db")
         self.cursor = self.db.cursor()
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS participant(confid TEXT , name TEXT,clgname TEXT,clgaddress TEXT, dept TEXT , mobile TEXT)""")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS participant(confid TEXT , name TEXT,clgname TEXT,clgaddress TEXT, dept TEXT, gender TEXT,mobile TEXT)""")
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS college(name TEXT, id TEXT, address TEXT, username TEXT, password TEXT)""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS advertisement(id TEXT,topic TEXT,clgname TEXT, clgaddress TEXT, dept TEXT, date TEXT, fees TEXT)""")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS advertisement(id TEXT,topic TEXT,clgid TEXT,clgname TEXT, clgaddress TEXT, dept TEXT, date TEXT, fees TEXT)""")
         self.run()
 
-    def par_submit(self):
-        self.cursor.execute("""INSERT INTO participant(confid,name,clgname,clgaddress,dept,mobile) VALUES('{}','{}','{}','{}','{}','{}')""".format(
-            self.confid,
-            self.par_name_entry.get(),
-            self.par_clg_entry.get(),
-            self.par_clgadd_entry.get(),
-            self.par_dept_entry.get(),
-            self.par_mob_entry.get()
-        ))
-        self.db.commit()
-        self.par_window.destroy()
-        messagebox.showinfo("Success","Participant Registered Successfully")
-    
-    def parmenu(self,args):
-        self.confid = args[0]
-        data = self.cursor.execute("SELECT * FROM advertisement WHERE id='{}'".format(args[0])).fetchall()
-        self.conf_name_entry.config(state=NORMAL)
-        self.conf_topic_entry.config(state=NORMAL)
-        self.conf_name_entry.delete(0,END)
-        self.conf_topic_entry.delete(0,END)
-        self.conf_name_entry.insert(0,data[0][1])
-        self.conf_topic_entry.insert(0,data[0][2])
-        print(self.parvariable)
-
-    def participant(self):
-        self.par_window = Toplevel()
-        self.par_window.title("Participant Registration")
-        self.par_window.geometry("500x500")
-        self.par_window.resizable(False,False)
-
-        self.parvariable = StringVar(self.par_window)
-        self.parvariable.set("Select Conferenece ID")
-        self.par_confmenu = OptionMenu(self.par_window, self.parvariable, *self.cursor.execute("SELECT id FROM advertisement").fetchall(),command = self.parmenu)        
-        self.par_confmenu.place(relx=0.1 , rely=0.1)
-
-        self.conf_name = Label(self.par_window, text="Conference Name:")
-        self.conf_name.place(relx=0.1, rely=0.2)
-
-        self.conf_name_entry = Entry(self.par_window , state=DISABLED)
-        self.conf_name_entry.place(relx=0.35, rely=0.2)
-
-        self.conf_topic = Label(self.par_window, text="Conference Topic:")
-        self.conf_topic.place(relx=0.1, rely=0.3)
-
-        self.conf_topic_entry = Entry(self.par_window , state=DISABLED)
-        self.conf_topic_entry.place(relx=0.35, rely=0.3)
-
-        parname = Label(self.par_window, text="Participant Name:")
-        parname.place(relx=0.1, rely=0.4)
-
-        self.par_name_entry = Entry(self.par_window)
-        self.par_name_entry.place(relx=0.35, rely=0.4)
-
-        parclg = Label(self.par_window, text="College Name:")
-        parclg.place(relx=0.1, rely=0.5)
-
-        self.par_clg_entry = Entry(self.par_window)
-        self.par_clg_entry.place(relx=0.35, rely=0.5)
-
-        parclgadd = Label(self.par_window, text="College Address:")
-        parclgadd.place(relx=0.1, rely=0.6)
-
-        self.par_clgadd_entry = Entry(self.par_window)
-        self.par_clgadd_entry.place(relx=0.35, rely=0.6)
-
-        pardept = Label(self.par_window, text="Department:")
-        pardept.place(relx=0.1, rely=0.7)
-
-        self.par_dept_entry = Entry(self.par_window)
-        self.par_dept_entry.place(relx=0.35, rely=0.7)
-
-        parmob = Label(self.par_window, text="Mobile Number:")
-        parmob.place(relx=0.1, rely=0.8)
-
-        self.par_mob_entry = Entry(self.par_window)
-        self.par_mob_entry.place(relx=0.35, rely=0.8)
-
-        self.par_submit = Button(self.par_window, text="Register", command=self.par_submit)
-        self.par_submit.place(relx=0.35, rely=0.9)
-    
-    def select_advertisement(self,args):        
-        data = self.cursor.execute("SELECT * FROM advertisement WHERE id='{}'".format(args[0])).fetchall()
-        
-        self.id_entry.delete(0,END)
-        self.topic_entry.delete(0,END)
-        self.clgname_entry.delete(0,END)
-        self.clgaddress_entry.delete(0,END)
-        self.dept_entry.delete(0,END)
-        self.date_entry.delete(0,END)
-        self.fees_entry.delete(0,END)
-
-        self.id_entry.insert(0,data[0][0])
-        self.topic_entry.insert(0,data[0][1])
-        self.clgname_entry.insert(0,data[0][2])
-        self.clgaddress_entry.insert(0,data[0][3])
-        self.dept_entry.insert(0,data[0][4])
-        self.date_entry.insert(0,data[0][5])
-        self.fees_entry.insert(0,data[0][6])
-        
-    def reg_update(self):
-        self.cursor.execute("""UPDATE advertisement SET id='{}', topic='{}', clgname='{}', clgaddress='{}', dept='{}', date='{}', fees='{}' WHERE id='{}'""".format(
-            self.id_entry.get(),
-            self.topic_entry.get(),
-            self.clgname_entry.get(),
-            self.clgaddress_entry.get(),
-            self.dept_entry.get(),
-            self.date_entry.get(),
-            self.fees_entry.get(),
-            self.id_entry.get()
-        ))
-        self.db.commit()
-        messagebox.showinfo("Success","Record Updated")
-
-
-    def advreg_submit(self):
-        self.cursor.execute("""INSERT INTO advertisement(id,topic,clgname, clgaddress, dept, date, fees) VALUES(?,?,?,?,?,?,?)""",(
-            self.id_entry.get(),self.topic_entry.get(),self.clgname_entry.get(),self.clgaddress_entry.get(),self.dept_entry.get(),self.date_entry.get(),self.fees_entry.get()
-            )
-        )
-        self.db.commit()
-        self.advreg.destroy()        
-        messagebox.showinfo("Success", "Advertisement Registration Successful")
-
-    def advertisement_registration(self):
-        self.advreg = Toplevel(self.root)
-        self.advreg.title("Advertisement Registration")
-        self.advreg.resizable(False,False)
-        self.advreg.geometry("500x500")
-        
+    def clgaddconf_submit(self):
         try:
-            self.variable = StringVar(self.advreg)
-            self.variable.set("Select Advertisement")
-            self.idoption = OptionMenu(self.advreg, self.variable , *self.cursor.execute("SELECT id FROM advertisement").fetchall() , command=self.select_advertisement)        
-            self.idoption.place(relx = 0.65 , rely = 0.09)
-
-            self.updatebtn = Button(self.advreg, text="Update", command = self.reg_update)
-            self.updatebtn.place(relx = 0.65 , rely = 0.16)
+            self.cursor.execute(
+                """INSERT INTO advertisement(id,topic,clgid,clgname,clgaddress,dept,date,fees) VALUES(?,?,?,?,?,?,?,?)""",(
+                    self.confid.get(), self.conftopic.get(), self.session[0][1], self.session[0][0], self.session[0][2], 
+                    self.dept.get(), self.date.get(), self.fees.get()
+                )
+            )   
+            self.db.commit()
+            messagebox.showinfo("Success", "Conference Added Successfully")
+            self.addconf_window.destroy()            
+            self.clgwindow.destroy()
+            self.refresh()
         except:
-            pass
+            messagebox.showerror("Error", "Conference Already Added")
 
-        self.id = Label(self.advreg, text="ID:")
-        self.id.place(relx = 0.1 , rely = 0.1)
+    def clgaddconf(self):
+        self.addconf_window = Toplevel(self.clgwindow)
+        self.addconf_window.title("Add Conference")
+        self.addconf_window.resizable(False,False)
+        self.addconf_window.geometry("500x500")
 
-        self.id_entry = Entry(self.advreg)
-        self.id_entry.place(relx = 0.35 , rely = 0.1)
+        Label(self.addconf_window, text="Conference ID").place(relx = 0.1, rely = 0.1)
 
-        self.topic = Label(self.advreg, text="Topic:")
-        self.topic.place(relx = 0.1 , rely = 0.2)
+        self.confid = Entry(self.addconf_window, width = 53)
+        self.confid.place(relx = 0.1, rely = 0.15)
 
-        self.topic_entry = Entry(self.advreg)
-        self.topic_entry.place(relx = 0.35 , rely = 0.2)
+        Label(self.addconf_window, text="Conference Topic").place(relx = 0.1, rely = 0.2)
 
-        self.clgname = Label(self.advreg, text="College Name:")
-        self.clgname.place(relx = 0.1 , rely = 0.3)
+        self.conftopic = Entry(self.addconf_window, width = 53)
+        self.conftopic.place(relx = 0.1, rely = 0.25)
 
-        self.clgname_entry = Entry(self.advreg)
-        self.clgname_entry.place(relx = 0.35 , rely = 0.3)
+        Label(self.addconf_window, text="Department").place(relx = 0.1, rely = 0.3)
 
-        self.clgaddress = Label(self.advreg, text="College Address:")
-        self.clgaddress.place(relx = 0.1 , rely = 0.4)
+        self.dept = Entry(self.addconf_window, width = 53)
+        self.dept.place(relx = 0.1, rely = 0.35)
 
-        self.clgaddress_entry = Entry(self.advreg)
-        self.clgaddress_entry.place(relx = 0.35 , rely = 0.4)
+        Label(self.addconf_window, text="Date").place(relx = 0.1, rely = 0.4)
 
-        self.dept = Label(self.advreg, text="Department:")
-        self.dept.place(relx = 0.1 , rely = 0.5)
+        self.date = Entry(self.addconf_window, width = 53)
+        self.date.place(relx = 0.1, rely = 0.45)
 
-        self.dept_entry = Entry(self.advreg)
-        self.dept_entry.place(relx = 0.35 , rely = 0.5)
+        Label(self.addconf_window, text="Fees").place(relx = 0.1, rely = 0.5)
 
-        self.date = Label(self.advreg, text="Date:")
-        self.date.place(relx = 0.1 , rely = 0.6)
+        self.fees = Entry(self.addconf_window, width = 53)
+        self.fees.place(relx = 0.1, rely = 0.55)
 
-        self.date_entry = Entry(self.advreg)
-        self.date_entry.place(relx = 0.35 , rely = 0.6)
+        Button(self.addconf_window, text="Add Conference", width = 15, command = self.clgaddconf_submit).place(relx = 0.1, rely = 0.6)
 
-        self.fees = Label(self.advreg, text="Fees:")
-        self.fees.place(relx = 0.1 , rely = 0.7)
+    def partable(self,args):
+        self.confid = args[0]             
+        table = ttk.Treeview(
+            self.clgwindow, 
+            height = 10, 
+            columns = ("ID","Name", "College Name", "College Address", "Department", "Gender", "Mobile")
+        )
+        table.heading("ID",text="ID")
+        table.heading("Name",text="Name")
+        table.heading("College Name", text="College Name")
+        table.heading("College Address" , text="College Address")
+        table.heading("Department", text="Department")
+        table.heading("Gender", text="Gender")
+        table.heading("Mobile", text="Mobile")
 
-        self.fees_entry = Entry(self.advreg)
-        self.fees_entry.place(relx = 0.35 , rely = 0.7)
+        table.column('#0',width=0)
+        table.column('#1',width=50)
+        table.column("#2", width= 100)
+        table.column("#3", width= 100)
+        table.column("#4", width= 100)
+        table.column("#5", width= 100)
+        table.column("#6", width= 70)
+        table.column("#7", width= 100)
 
-        self.submit = Button(self.advreg, text="Register" , width = 15 , command = self.advreg_submit)
-        self.submit.place(relx = 0.35 , rely = 0.75)
+        table.place(relx=0.05,rely=0.2)
 
-    def clgreg_submit(self):
-        self.cursor.execute("""INSERT INTO college(name, id, address, username, password) VALUES(?,?,?,?,?)""",(
-                self.clg_name_entry.get(),self.clg_code_entry.get(),self.clg_address_entry.get(),self.clg_username_entry.get(),self.clg_password_entry.get()
+        for x in self.cursor.execute("""SELECT * FROM participant WHERE confid = ? """,(self.confid,)):
+            table.insert("",END,values=x)
+        
+        xscroll = ttk.Scrollbar(table, orient=HORIZONTAL, command=table.xview)
+        xscroll.place(relx=0.05,rely=0.9,relwidth=0.9)
+        table.configure(xscrollcommand=xscroll.set)
+
+        yscroll = ttk.Scrollbar(table, orient=VERTICAL, command=table.yview)
+        yscroll.place(relx=0.95,rely=0.2,relheight=0.7)
+        table.configure(yscrollcommand=yscroll.set)
+
+        
+        
+
+    def clglogin(self):
+        data = self.cursor.execute("""SELECT * FROM college WHERE username = ? AND password = ?""", (
+            self.clgusername_entry.get(), self.clgpassword_entry.get())
+        ).fetchall()
+
+        if data == []:
+            messagebox.showerror("Error", "Invalid Username or Password")
+        else:
+            self.session = data
+            self.clgwindow = Toplevel(self.root)
+            self.clgwindow.title("{} | Admin".format(data[0][0]))
+            self.clgwindow.resizable(False,False)
+            self.clgwindow.geometry("700x500")
+
+            Button(self.clgwindow, text="Add Conference", width = 15, command = self.clgaddconf).place(relx = 0.1, rely = 0.1)
+
+            try:
+                var = StringVar(self.clgwindow)
+                var.set("Select Conference")
+                self.conf = OptionMenu(
+                    self.clgwindow, 
+                    var, 
+                    *self.cursor.execute("""SELECT id FROM advertisement WHERE clgid = ?""", (self.session[0][1],)).fetchall(),
+                    command=self.partable
+                )
+                self.conf.place(relx = 0.7, rely = 0.1)
+                
+            except:
+                pass
+            
+
+    def participant_registration_submit(self):
+        self.cursor.execute(
+            """INSERT INTO participant(confid,name,clgname,clgaddress,dept,gender,mobile) VALUES(?,?,?,?,?,?,?)""",(
+                self.parconfid,
+                self.parname.get(),
+                self.parclgname.get(),
+                self.parclgaddress.get(),
+                self.pardept.get(),
+                self.pargender.get(),
+                self.parmobile.get()
             )
         )
         self.db.commit()
-        self.clg_window.destroy()
-        messagebox.showinfo("Success", "College Registration Successful")
+        messagebox.showinfo("Success", "Participant Registered Successfully")
+        self.participantreg_window.destroy()
 
+    def parregmenu(self,args):
+        self.parconfid = args[0]
 
-    def college(self):
-        self.clg_window = Toplevel(self.root)
-        self.clg_window.title("College Registration")
-        self.clg_window.resizable(False,False)
-        self.clg_window.geometry("500x500")
-
-        self.clg_code = Label(self.clg_window, text="College Code:")
-        self.clg_code.place(relx = 0.1 , rely = 0.1)
-
-        self.clg_code_entry = Entry(self.clg_window)
-        self.clg_code_entry.place(relx = 0.35 , rely = 0.1)
-
-        self.clg_name = Label(self.clg_window, text="College Name:")
-        self.clg_name.place(relx = 0.1 , rely = 0.2)
-
-        self.clg_name_entry = Entry(self.clg_window)
-        self.clg_name_entry.place(relx = 0.35 , rely = 0.2)
-
-        self.clg_address = Label(self.clg_window, text="College Address:")
-        self.clg_address.place(relx = 0.1 , rely = 0.3)
-
-        self.clg_address_entry = Entry(self.clg_window)
-        self.clg_address_entry.place(relx = 0.35 , rely = 0.3)
-
-        self.clg_username = Label(self.clg_window, text="College Username:")
-        self.clg_username.place(relx = 0.1 , rely = 0.4)
-
-        self.clg_username_entry = Entry(self.clg_window)
-        self.clg_username_entry.place(relx = 0.35 , rely = 0.4)
-
-        self.clg_password = Label(self.clg_window, text="College Password:")
-        self.clg_password.place(relx = 0.1 , rely = 0.5)
-
-        self.clg_password_entry = Entry(self.clg_window)
-        self.clg_password_entry.place(relx = 0.35 , rely = 0.5)
-
-        self.clg_submit = Button(self.clg_window, text="Submit" , command=self.clgreg_submit)
-        self.clg_submit.place(relx = 0.35 , rely = 0.6)
-
-        self.advertisement = Button(self.clg_window, text="Advertisement Registration" , command=self.advertisement_registration)
-        self.advertisement.place(relx = 0.1 , rely = 0.7)
-
-    def participant_list(self):
-        username = self.username_entry.get()
-        password = self.password_entry.get()
-
-        self.cursor.execute("""SELECT * FROM college WHERE username = ? AND password = ?""",(username,password))
-        result = self.cursor.fetchone()
-        if result is None:
-            messagebox.showinfo("Error", "Invalid Username or Password")
+    def participant_registration(self):
+        self.participantreg_window = Toplevel(self.root)
+        self.participantreg_window.title("Participant Registration")
+        self.participantreg_window.resizable(False,False)
+        self.participantreg_window.geometry("500x500")
+        
+        data = self.cursor.execute("""SELECT id FROM advertisement""").fetchall()        
+        if data == []:
+            Label(self.participantreg_window, text="No Conference Registered").place(relx = 0.1, rely = 0.15)
         else:
-            self.participant_list_window = Toplevel(self.root)
-            self.participant_list_window.title("Participant List")
-            self.participant_list_window.resizable(False,False)
-            self.participant_list_window.geometry("500x500")
+            self.var = StringVar(self.participantreg_window)
+            self.var.set("Select Conference Id")
+            self.confid = OptionMenu(self.participantreg_window, self.var,*data , command = self.parregmenu)
+            self.confid.place(relx = 0.1, rely = 0.12)
+        
+        Label(self.participantreg_window, text="Name").place(relx = 0.1, rely = 0.2)
 
-            self.parlistvar = StringVar(self.participant_list_window)
-            self.parlistvar.set("Select")
-             
-            allid = [x[0] for x in self.cursor.execute("SELECT * FROM advertisement WHERE clgname='{}'".format(result[0])).fetchall()]
-            self.parlist = OptionMenu(self.participant_list_window, self.parlistvar, *allid)
-            self.parlist.place(relx = 0.1 , rely = 0.1)
-            
-            self.parlisttree = Treeview(self.participant_list_window)
-            self.parlisttree["columns"]=("Conferenece ID","Participant Name", "Phone Number", "Email", "College Name", "College Address")
-            self.parlisttree.column("#0", width=1)
-            self.parlisttree.column("Conference ID", width=100)
-            self.parlisttree.column("Participant Name", width=100)
-            self.parlisttree.column("Phone Number", width=100)
-            self.parlisttree.column("Email", width=100)
-            self.parlisttree.column("College Name", width=100)
-            self.parlisttree.column("College Address", width=100)
-            self.parlisttree.heading("Conference ID", text="Conference ID")
-            self.parlisttree.heading("Participant Name", text="Participant Name")
-            self.parlisttree.heading("Phone Number", text="Phone Number")
-            self.parlisttree.heading("Email", text="Email")
-            self.parlisttree.heading("College Name", text="College Name")
-            self.parlisttree.heading("College Address", text="College Address")
-            self.parlisttree.place(relx = 0.1 , rely = 0.2)
+        self.parname = Entry(self.participantreg_window, width = 53)
+        self.parname.place(relx = 0.1, rely = 0.25)
 
-            
-            
+        Label(self.participantreg_window, text="College Name").place(relx = 0.1, rely = 0.3)
+
+        self.parclgname = Entry(self.participantreg_window, width = 53)
+        self.parclgname.place(relx = 0.1, rely = 0.35)
+
+        Label(self.participantreg_window, text="College Address").place(relx = 0.1, rely = 0.4)
+
+        self.parclgaddress = Entry(self.participantreg_window, width = 53)
+        self.parclgaddress.place(relx = 0.1, rely = 0.45)
+
+        Label(self.participantreg_window, text="Department").place(relx = 0.1, rely = 0.5)
+
+        self.pardept = Entry(self.participantreg_window, width = 53)
+        self.pardept.place(relx = 0.1, rely = 0.55)
+
+        Label(self.participantreg_window, text="Gender").place(relx=0.1, rely=0.6)
+
+        self.pargender = Entry(self.participantreg_window, width= 53)
+        self.pargender.place(relx = 0.1,rely = 0.65)
+
+        Label(self.participantreg_window, text="Mobile Number").place(relx=0.1, rely=0.7)
+
+        self.parmobile = Entry(self.participantreg_window, width= 53)
+        self.parmobile.place(relx = 0.1,rely = 0.75)
+        
+        if data != []:
+            self.participantreg_button = Button(self.participantreg_window, text="Register", width = 15, command = self.participant_registration_submit)
+            self.participantreg_button.place(relx = 0.1, rely = 0.8)
+        else:
+            Button(self.participantreg_window, text="Coming Soon", width = 15).place(relx = 0.1, rely = 0.8)
+
+    def college_registration_submit(self):
+        try:
+            self.cursor.execute(
+                """INSERT INTO college(name, id, address, username, password) VALUES(?,?,?,?,?)""",
+                (self.clgname.get(), self.clgid.get(), self.clgaddress.get(), self.clgusername.get(), self.clgpassword.get())
+            )
+            self.db.commit()
+            messagebox.showinfo("Success", "College Registered Successfully")
+            self.clgreg_window.destroy()
+        except:
+            messagebox.showerror("Error", "College Already Registered")
+
+        
+    
+    def college_registration(self):
+        self.clgreg_window = Toplevel(self.root)
+        self.clgreg_window.title("College Registration")
+        self.clgreg_window.resizable(False,False)
+        self.clgreg_window.geometry("500x500")
+
+        Label(self.clgreg_window, text="College ID").place(relx = 0.1, rely = 0.1)
+
+        self.clgid = Entry(self.clgreg_window, width = 53)
+        self.clgid.place(relx = 0.1, rely = 0.15)
+
+        Label(self.clgreg_window, text="College Name").place(relx = 0.1, rely = 0.2)
+
+        self.clgname = Entry(self.clgreg_window, width = 53)
+        self.clgname.place(relx = 0.1, rely = 0.25)
+
+        Label(self.clgreg_window, text="College Address").place(relx = 0.1, rely = 0.3)
+
+        self.clgaddress = Entry(self.clgreg_window, width = 53)
+        self.clgaddress.place(relx = 0.1, rely = 0.35)
+
+        Label(self.clgreg_window, text="Username").place(relx = 0.1, rely = 0.4)
+
+        self.clgusername = Entry(self.clgreg_window, width = 53)
+        self.clgusername.place(relx = 0.1, rely = 0.45)
+
+        Label(self.clgreg_window, text="Password").place(relx = 0.1, rely = 0.5)
+
+        self.clgpassword = Entry(self.clgreg_window, show="*", width = 53)
+        self.clgpassword.place(relx = 0.1, rely = 0.55)
+
+        self.clgreg_button = Button(self.clgreg_window, text="Register", width = 15, command = self.college_registration_submit)
+        self.clgreg_button.place(relx = 0.1, rely = 0.65)
+
+        self.clgreg_window.mainloop()
+
+    def refresh(self):
+        self.root.destroy()
+        self.__init__()
 
 
     def run(self):
@@ -296,44 +262,57 @@ class Conference:
         self.root.title("Advertisements")        
         self.root.resizable(False,False)
         self.root.geometry("1000x400")
-        self.tree = ttk.Treeview(self.root)
-        self.tree["columns"] = ("ConferenceID", "Topic", "College Name", "College Address", "Department", "Date", "Fees")
-        self.tree.heading("ConferenceID", text="Conference ID")
-        self.tree.heading("Topic", text="Topic")
-        self.tree.heading("College Name", text="College Name")
-        self.tree.heading("College Address", text="College Address")
-        self.tree.heading("Department", text="Department")
-        self.tree.heading("Date", text="Date")
-        self.tree.heading("Fees", text="Fees")
-        self.tree.pack()
+
+        
+        tree = ttk.Treeview(self.root)
+        tree["columns"] = ("ConferenceID", "Topic", "College Id","College Name", "College Address", "Department", "Date", "Fees")
+        tree.heading("ConferenceID", text="Conference ID")
+        tree.heading("Topic", text="Topic")
+        tree.heading("College Id", text="College Id")
+        tree.heading("College Name", text="College Name")
+        tree.heading("College Address", text="College Address")
+        tree.heading("Department", text="Department")
+        tree.heading("Date", text="Date")
+        tree.heading("Fees", text="Fees")
+        tree.pack()
+
+        tree.bind("<Double-1>", lambda event: self.participant_registration())
 
         for x in self.cursor.execute("SELECT * FROM advertisement"):
-            self.tree.insert("", "end", values=x)
+            tree.insert("", "end", values=x)
 
-        self.scrollbar = Scrollbar(self.root, orient=HORIZONTAL, command=self.tree.xview)
-        self.scrollbar.pack(side=BOTTOM, fill=X)
-        self.tree.configure(xscrollcommand=self.scrollbar.set)
+        xscrollbar = Scrollbar(self.root, orient=HORIZONTAL, command=tree.xview)
+        xscrollbar.pack(side=BOTTOM, fill=X)
+        tree.configure(xscrollcommand=xscrollbar.set)
 
-        self.participant = Button(self.root, text="Participant", command=self.participant)
+        yscrollbar = Scrollbar(self.root, orient=VERTICAL, command=tree.yview)
+        yscrollbar.pack(side=RIGHT, fill=Y)
+        tree.configure(yscrollcommand=yscrollbar.set)
+
+
+        self.participant = Button(self.root, text="Participant", width=15, command = self.participant_registration)
         self.participant.pack(side = LEFT)
 
-        self.college = Button(self.root, text="College", command=self.college , width = 15)
+        self.college = Button(self.root, text="College", width = 15 , command= self.college_registration)
         self.college.pack(side = LEFT)
 
-        login = Button(self.root, text="Login" , command = self.participant_list)
+        Button(self.root, text="🔃", command = self.refresh).pack(side = RIGHT)            
+
+        login = Button(self.root, text="Login", width = 15 , command = self.clglogin)
         login.pack(side = RIGHT)
 
-        self.password_entry = Entry(self.root, show="*")
-        self.password_entry.pack(side = RIGHT)
+        self.clgpassword_entry = Entry(self.root, show="*")
+        self.clgpassword_entry.pack(side = RIGHT)
 
         password = Label(self.root, text="Password:")
         password.pack(side = RIGHT)
 
-        self.username_entry = Entry(self.root)
-        self.username_entry.pack(side = RIGHT)
+        self.clgusername_entry = Entry(self.root)
+        self.clgusername_entry.pack(side = RIGHT)
 
         username = Label(self.root, text="Username:")
         username.pack(side = RIGHT )
 
         self.root.mainloop()
+
 Conference()
