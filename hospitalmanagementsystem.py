@@ -29,7 +29,7 @@ class Hospital:
         self.cursor.execute(
             """
                 CREATE TABLE IF NOT EXISTS account(
-                    id INTEGER, pid TEXT, pname TEXT, bloodgrp TEXT, surgeryamount INTEGER,
+                    pid TEXT, pname TEXT, bloodgrp TEXT, surgeryamount INTEGER,
                     scanamount INTEGER, medicine TEXT, totalamount INTEGER
                 ) 
             """
@@ -48,6 +48,177 @@ class Hospital:
     def open_pharmacy(self):
         pass
 
+    def account_add_submit(self):
+        try:
+            self.cursor.execute(
+                """
+                INSERT INTO account(pid, pname, bloodgrp, surgeryamount, scanamount, medicine, totalamount)
+                VALUES(?,?,?,?,?,?,?)
+                """,(
+                    self.pid.get(),
+                    self.pname.get(),
+                    self.bloodgrp.get(),
+                    self.surgeryamount.get(),
+                    self.scanamount.get(),
+                    self.medicine.get(),
+                    int(self.surgeryamount.get())+int(self.scanamount.get())
+                )
+            )   
+
+            self.db.commit()
+
+            messagebox.showinfo("Success", "Account Added\n ID: {}".format(self.pid.get()))
+
+            self.pid.delete(0, END)
+            self.pname.delete(0, END)
+            self.bloodgrp.delete(0, END)
+            self.surgeryamount.delete(0, END)
+            self.scanamount.delete(0, END)
+            self.medicine.delete(0, END)
+        except:
+            messagebox.showerror("Error", "Invalid Input")
+
+    
+    def account_update_submit(self):
+        try:
+            self.cursor.execute(
+                """
+                    UPDATE account SET pid=?, pname=?, bloodgrp=?, surgeryamount=?, scanamount=?, medicine=?, totalamount=? WHERE pid=?
+                """,(
+                    self.pid.get(),
+                    self.pname.get(),
+                    self.bloodgrp.get(),
+                    self.surgeryamount.get(),
+                    self.scanamount.get(),
+                    self.medicine.get(),
+                    int(self.surgeryamount.get())+int(self.scanamount.get()),
+                    self.pid.get()
+                )
+            )
+            self.db.commit()
+
+            self.pid.delete(0, END)
+            self.pname.delete(0, END)
+            self.bloodgrp.delete(0, END)
+            self.surgeryamount.delete(0, END)
+            self.scanamount.delete(0, END)
+            self.medicine.delete(0, END)
+
+            messagebox.showinfo("Success", "Account Updated")        
+        except:
+            messagebox.showerror("Error", "Invalid Input")
+
+    def account_delete_submit(self):
+        try:
+            self.cursor.execute("DELETE FROM account WHERE pid=?",(self.pid.get(),))
+            self.db.commit()
+
+            self.pid.delete(0, END)
+            self.pname.delete(0, END)
+            self.bloodgrp.delete(0, END)
+            self.surgeryamount.delete(0, END)
+            self.scanamount.delete(0, END)
+            self.medicine.delete(0, END)
+
+            messagebox.showinfo("Success", "Account Deleted")
+        except:
+            messagebox.showerror("Error", "Invalid Input")
+
+    def get_account(self):
+        data = self.cursor.execute("SELECT * FROM account WHERE pid='{}'".format(self.pid.get())).fetchall()
+        if data:
+            self.pname.delete(0, END)
+            self.pname.insert(0, data[0][1])
+            self.bloodgrp.delete(0, END)
+            self.bloodgrp.insert(0, data[0][2])
+            self.surgeryamount.delete(0, END)
+            self.surgeryamount.insert(0, data[0][3])
+            self.scanamount.delete(0, END)
+            self.scanamount.insert(0, data[0][4])
+            self.medicine.delete(0, END)
+            self.medicine.insert(0, data[0][5])
+        else:
+            messagebox.showerror("Error", "No record found")
+
+    def open_account(self):
+        self.accountwindow = Toplevel(self.adminhome)
+        self.accountwindow.title("Account")
+        self.accountwindow.geometry("500x500")
+        self.accountwindow.resizable(False, False)
+
+        Label(self.accountwindow, text="Patient ID").place(relx=0.1, rely=0.05)
+        
+        self.pid = Entry(self.accountwindow)
+        self.pid.place(relx=0.4, rely=0.05)
+
+        Button(self.accountwindow, text="GET",width=10,command=self.get_account).place(relx=0.65, rely=0.045)
+
+        Label(self.accountwindow, text="Patient Name:").place(relx=0.1, rely=0.1)
+
+        self.pname = Entry(self.accountwindow,width=35)
+        self.pname.place(relx=0.4, rely=0.1)
+
+        Label(self.accountwindow, text="Blood Group:").place(relx=0.1, rely=0.2)
+
+        self.bloodgrp = Entry(self.accountwindow,width=35)
+        self.bloodgrp.place(relx=0.4, rely=0.2)
+
+        Label(self.accountwindow, text="Surgery Amount:").place(relx=0.1, rely=0.3)
+
+        self.surgeryamount = Entry(self.accountwindow,width=35)
+        self.surgeryamount.place(relx=0.4, rely=0.3)
+
+        Label(self.accountwindow, text="Scan Amount:").place(relx=0.1, rely=0.4)
+
+        self.scanamount = Entry(self.accountwindow,width=35)
+        self.scanamount.place(relx=0.4, rely=0.4)
+
+        Label(self.accountwindow, text="Medicine:").place(relx=0.1, rely=0.5)
+
+        self.medicine = Entry(self.accountwindow,width=35)
+        self.medicine.place(relx=0.4, rely=0.5)
+
+        Button(self.accountwindow, text="Add", command=self.account_add_submit).place(relx=0.4, rely=0.6)
+        Button(self.accountwindow, text="Update", command=self.account_update_submit).place(relx=0.47, rely=0.6)
+        Button(self.accountwindow, text="Delete", command=self.account_delete_submit).place(relx=0.57, rely=0.6)
+
+        
+
+    def delete_employee_submit(self):
+        self.cursor.execute("DELETE FROM employees WHERE id=?",(self.eid.get(),))
+        self.db.commit()
+
+        self.ename.delete(0, END)
+        self.eage.delete(0, END)
+        self.egender.delete(0, END)
+        self.eaddress.delete(0, END)
+        self.esalary.delete(0, END)
+        self.jobtype.set("Select Job Type")
+        self.eid.delete(0, END)
+
+        messagebox.showinfo("Success", "Employee Deleted")
+
+    def update_employee_submit(self):
+        self.cursor.execute("""UPDATE employees SET name=?,age=?,gender=?,jobtype=?,address=?,salary=? WHERE id=?""",(
+            self.ename.get(),
+            int(self.eage.get()),
+            self.egender.get(),
+            self.jobtype.get(),
+            self.eaddress.get(),
+            int(self.esalary.get()),
+            self.eid.get()
+        ))
+        self.db.commit()
+
+        self.ename.delete(0, END)
+        self.eage.delete(0, END)
+        self.egender.delete(0, END)
+        self.eaddress.delete(0, END)
+        self.esalary.delete(0, END)
+        self.jobtype.set("Select Job Type")
+
+        messagebox.showinfo("Success", "Employee Updated")
+
     def add_employee_submit(self):
         eid = random.randint(10000,999999999)
         self.cursor.execute("""INSERT INTO employees(id,name,age,gender,jobtype,address,salary) VALUES(?,?,?,?,?,?,?)""",(
@@ -59,14 +230,23 @@ class Hospital:
             self.eaddress.get(),
             int(self.esalary.get())
         ))
-        self.db.commit()
-        messagebox.showinfo("Success", "Employee ID: {}\nCopied To Clipboard".format(eid))
+        self.db.commit()        
+        
+        self.ename.delete(0, END)
+        self.eage.delete(0, END)
+        self.egender.delete(0, END)
+        self.eaddress.delete(0, END)
+        self.esalary.delete(0, END)
+        self.jobtype.set("Select Job Type")
+
         self.root.clipboard_clear()
         self.root.clipboard_append(str(eid))
-        self.addemployeewindow.destroy()
+
+        messagebox.showinfo("Success", "Employee ID: {}\nCopied To Clipboard".format(eid))
+
 
     def get_employee(self):
-        data = self.cursor.execute("SELECT * FROM employees WHERE id=?",(self.eid.get())).fetchone()
+        data = self.cursor.execute("SELECT * FROM employees WHERE id='{}'".format(self.eid.get())).fetchone()
         if data:
             self.ename.insert(0, data[1])
             self.eage.insert(0, data[2])
@@ -116,8 +296,8 @@ class Hospital:
         self.esalary.place(relx=0.4, rely=0.6)
 
         Button(self.addemployeewindow, text="Add", command=self.add_employee_submit).place(relx=0.4, rely=0.7)
-        Button(self.addemployeewindow, text="Update").place(relx=0.55, rely=0.7)
-        Button(self.addemployeewindow, text="Delete").place(relx=0.75, rely=0.7)
+        Button(self.addemployeewindow, text="Update",command=self.update_employee_submit).place(relx=0.55, rely=0.7)
+        Button(self.addemployeewindow, text="Delete",command=self.delete_employee_submit).place(relx=0.75, rely=0.7)
 
 
         Label(self.addemployeewindow, text="ID:").place(relx=0.1, rely=0.8)
@@ -127,8 +307,59 @@ class Hospital:
         
         Button(self.addemployeewindow, text="GET",command=self.get_employee).place(relx=0.4, rely=0.85)
 
+    def idviewemployee(self,arg):
+        try:
+            self.idviewemployeewindow = Toplevel(self.adminhome)
+            self.idviewemployeewindow.title("Employee | {}".format(arg))
+            self.idviewemployeewindow.geometry("500x500")
+            self.idviewemployeewindow.resizable(False, False)
+
+            data = self.cursor.execute("SELECT * FROM employees WHERE id=?",(arg,)).fetchone()
+            
+            Label(self.idviewemployeewindow, text="ID: {}".format(data[0])).place(relx=0.1, rely=0.1)
+            Label(self.idviewemployeewindow, text="Name: {}".format(data[1])).place(relx=0.1, rely=0.2)
+            Label(self.idviewemployeewindow, text="Age: {}".format(data[2])).place(relx=0.1, rely=0.3)
+            Label(self.idviewemployeewindow, text="Gender: {}".format(data[3])).place(relx=0.1, rely=0.4)
+            Label(self.idviewemployeewindow, text="Jobtype: {}".format(data[4])).place(relx=0.1, rely=0.5)
+            Label(self.idviewemployeewindow, text="Address: {}".format(data[5])).place(relx=0.1, rely=0.6)
+            Label(self.idviewemployeewindow, text="Salary: {}".format(data[6])).place(relx=0.1, rely=0.7)
+
+            Button(self.idviewemployeewindow, text="Back", command=self.idviewemployeewindow.destroy).place(relx=0.4, rely=0.8)
+        except:
+            messagebox.showinfo("Error", "Employee ID Not Found")
+
+        
     def view_employee(self):
-        pass
+        self.viewemployeewindow = Toplevel(self.adminhome)
+        self.viewemployeewindow.title("View Employee")
+        self.viewemployeewindow.geometry("500x500")
+        self.viewemployeewindow.resizable(False, False)
+
+        Label(self.viewemployeewindow, text="Employee ID").pack()
+
+        self.eid = Entry(self.viewemployeewindow, width=30)
+        self.eid.pack()
+
+        Button(self.viewemployeewindow, text="GET",command=lambda : self.idviewemployee(self.eid.get())).pack()
+
+        tree = ttk.Treeview(self.viewemployeewindow, columns=("id", "name"), show="headings", height=10)
+        tree.pack()
+
+        tree.heading("id", text="ID")
+        tree.heading("name", text="Name")
+
+        tree.column("#0", width=0)
+        tree.column("id", width=100)
+        tree.column("name", width=100)
+
+        for x in self.cursor.execute("SELECT id,name FROM employees"):
+            tree.insert("", "end", values=x)
+    
+        tree.bind("<Double-1>", lambda event: self.idviewemployee(tree.item(tree.selection())["values"][0]))
+
+        yscroll = ttk.Scrollbar(self.viewemployeewindow, orient="vertical", command=tree.yview)
+        yscroll.pack(side=RIGHT, fill=Y)
+        tree.configure(yscrollcommand=yscroll.set)
 
     def add_patient_submit(self):
         pid = random.randint(10000,999999999)
@@ -191,6 +422,7 @@ class Hospital:
             messagebox.showinfo("Success", "Patient Updated")        
         else:
             messagebox.showinfo("Error", "Enter Patient ID")
+
     def delete_patient_submit(self):
         if self.pid.get() != "":
             query = self.cursor.execute(
@@ -311,28 +543,28 @@ class Hospital:
         data = self.cursor.execute("""SELECT * FROM patients WHERE id = {}""".format(arg)).fetchall()
 
         Label(self.patiendetails, text="Patient ID:").place(relx=0.1,rely=0.1)
-        Label(self.patiendetails, text=data[0][0]).place(relx=0.3,rely=0.1)
+        Label(self.patiendetails, text=data[0][0]).place(relx=0.4,rely=0.1)
 
         Label(self.patiendetails, text="Patient Name:").place(relx=0.1,rely=0.2)
-        Label(self.patiendetails, text=data[0][1]).place(relx=0.3,rely=0.2)
+        Label(self.patiendetails, text=data[0][1]).place(relx=0.4,rely=0.2)
 
         Label(self.patiendetails, text="Patient Age:").place(relx=0.1,rely=0.3)
-        Label(self.patiendetails, text=data[0][2]).place(relx=0.3,rely=0.3)
+        Label(self.patiendetails, text=data[0][2]).place(relx=0.4,rely=0.3)
 
         Label(self.patiendetails, text="Patient Gender:").place(relx=0.1,rely=0.4)
-        Label(self.patiendetails, text=data[0][3]).place(relx=0.3,rely=0.4)
+        Label(self.patiendetails, text=data[0][3]).place(relx=0.4,rely=0.4)
 
         Label(self.patiendetails, text="Patient Blood Group:").place(relx=0.1,rely=0.5)
-        Label(self.patiendetails, text=data[0][4]).place(relx=0.3,rely=0.5)
+        Label(self.patiendetails, text=data[0][4]).place(relx=0.4,rely=0.5)
 
         Label(self.patiendetails, text="Patient Description:").place(relx=0.1,rely=0.6)
-        Label(self.patiendetails, text=data[0][5]).place(relx=0.3,rely=0.6)
+        Label(self.patiendetails, text=data[0][5]).place(relx=0.4,rely=0.6)
 
         Label(self.patiendetails, text="Patient Address:").place(relx=0.1,rely=0.7)
-        Label(self.patiendetails, text=data[0][6]).place(relx=0.3,rely=0.7)
+        Label(self.patiendetails, text=data[0][6]).place(relx=0.4,rely=0.7)
 
         Label(self.patiendetails, text="Patient Mobile No.:").place(relx=0.1,rely=0.8)
-        Label(self.patiendetails, text=data[0][7]).place(relx=0.3,rely=0.8)
+        Label(self.patiendetails, text=data[0][7]).place(relx=0.4,rely=0.8)
 
         Button(self.patiendetails, text="Close", width = 10,command=self.patiendetails.destroy).place(relx=0.7, rely=0.89)
 
@@ -377,9 +609,6 @@ class Hospital:
         yscrollbar.pack(side=RIGHT, fill=Y)
         allpatienttable.configure(yscrollcommand=yscrollbar.set)
 
-
-    def open_account(self):
-        pass
 
     def login_submit(self):
         if self.username.get() == "admin" and self.password.get() == "admin":
